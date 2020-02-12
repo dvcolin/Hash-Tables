@@ -55,15 +55,22 @@ class HashTable:
 
         if self.storage[index] != None:
             if self.storage[index].key == key:
-                self.storage[index].value = value
+                self.storage[index] = LinkedPair(key, value)
             else:
-                node = self.storage[index].next
-                while node != None:
-                    while node.next != None:
-                        if node.key == key:
-                            node.value = value
-                            return
+                if self.storage[index].next != None:
+                    prev_node = self.storage[index]
+                    node = prev_node.next
 
+                    while node != None:
+                        if node.key == key:
+                            prev_node.next = LinkedPair(key, value)
+                            return
+                        prev_node = node
+                        node = node.next
+
+                    prev_node.next = LinkedPair(key, value)
+                else:
+                    self.storage[index].next = LinkedPair(key, value)
         else:
             self.storage[index] = LinkedPair(key, value)
 
@@ -81,7 +88,18 @@ class HashTable:
             if self.storage[index].key == key:
                 self.storage[index] = None
             else:
+                prev_node = self.storage[index]
+                node = prev_node.next
+
+                while node != None:
+                    if node.key == key:
+                        prev_node.next = None
+                        return
+                    else:
+                        prev_node = node
+                        node = node.next
                 print('Warning: Key not found')
+
         else:
             print('Warning: Key not found')
 
@@ -117,13 +135,16 @@ class HashTable:
         Fill this in.
         '''
 
-        old_storage = self.storage
+        old_storage = [item for item in self.storage]
         self.capacity *= 2
         self.storage = [None] * self.capacity
 
         for item in old_storage:
             if item != None:
-                self.insert(item.key, item.value)
+                node = item
+                while node != None:
+                    self.insert(node.key, node.value)
+                    node = node.next
 
 
 if __name__ == "__main__":
